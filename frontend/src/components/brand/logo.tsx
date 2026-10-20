@@ -1,0 +1,56 @@
+import { cn } from "@/lib/utils";
+
+/** The f69 Labs "F69" mark, traced from F69-labs-icon.png (viewBox 215 × 100). */
+const F69_PATH =
+  "M30.1 0l44.9 0l0.8 0.2l0.2 0.4l-0.4 1.5l-1.5 2.9l-1.5 2.4l-2 2.6l-1.9 2.3l-2.5 2.4l-2 1.4l-2.2 1.1l-2.8 0.9l-2 0.2l-25.8 0.1l-2.6 0.5l-3.3 1.5l-1.5 1.1l-1.3 1.2l-1.5 1.9l-1 1.8l-0.5 1.2l-0.5 2l-0.1 5.9l-0.2 0.4l-0.3 0.1l-4-2l-2-0.5l-2.4-0.2l-3.7 0.3l-1.7 0.5l-3.1 1.6l-0.5-0.1l-0.2-0.7l0.1-6.6l0.5-3.7l0.6-2.5l1.9-4.8l2.4-4.2l3.1-3.8l3.8-3.3l1.3-0.9l3.3-1.9l3.6-1.6l3.7-1l2.3-0.4z" +
+  "M99 0l18.5-0l0.7 0.1l0.1 0.5l-17.7 22.9l-19.2 24l-1.6 2.5l-1 2.1l-1 2.9l-0.5 2.4l-0.3 2.7l-0 2.3l0.2 2.6l0.6 2.2l1 2.7l1 2.1l1.5 2.3l1.4 1.8l2.2 2l2 1.5l2.9 1.5l2.4 0.9l2.5 0.6l4 0.3l3.7-0.4l2.1-0.5l2.5-0.9l3.7-2.1l3.2-2.7l2-2.6l2-3.3l0.9-2.5l0.7-2.4l0.4-0.4l0.6 0.4l11.4 10.5l0.8 0.7l0.2 0.6l-0.8 2l-1.5 2.7l-2.9 4.1l-3.9 4.1l-4.7 3.6l-2.4 1.5l-3 1.5l-4 1.5l-3.7 0.9l-2.5 0.5l-5.7 0.3l-4-0.2l-3.2-0.6l-3.9-1l-3.7-1.4l-2.9-1.5l-3.2-1.9l-3.2-2.5l-2.3-2.1l-2.9-3.3l-1.6-2.2l-1.9-3.2l-2-4l-1.4-4.2l-1-3.8l-0.5-4.1l-0.1-2.9l0.1-2.6l0.5-3.7l1.4-5.8l2.1-5.3l3.4-6l12.2-15.5l13.3-16.2l4.4-5.2l0.8-0.6z" +
+  "M173 3.2l3.6-0l4.7 0.5l3.9 0.8l4.5 1.5l4.1 2l3.3 2l4.4 3.5l2.9 2.8l2.5 3.1l2.4 3.6l2 3.8l2 5l0.9 3.6l0.6 3.6l0.3 5l-0.3 4.9l-1 5.3l-1.5 4.7l-1.5 3.6l-2.9 5.2l-1.5 2.1l-3.5 4.4l-20.3 25l-0.9 0.5l-0.8 0.2l-19.1-0l-0.5-0.4l0.2-0.6l31.7-40.2l2.4-3.8l1.4-3l0.5-1.8l0.6-2.4l0.3-2.8l-0.1-2.7l-0.3-3l-0.4-1.8l-1-2.7l-1-2.1l-1.5-2.2l-3.3-3.8l-1.6-1.4l-2-1.4l-4.1-2l-3-0.9l-2.4-0.5l-3.9-0.1l-3.9 0.6l-2.8 0.9l-2.2 1l-3.3 2l-1.9 1.5l-1.7 1.6l-1.5 2l-1.5 2.2l-1 1.8l-1 2.5l-1 4.5l-0.2 2.7l0.1 3.5l1.1 5.3l1.6 4l-0.2 0.4l-0.4-0.2l-3.2-2.9l-14.8-13.5l-0.3-0.6l0.1-1.7l0.5-3.1l1-3.6l1-2.9l1.4-3.1l2.1-3.6l1.4-2.1l2.1-2.5l2.9-3.1l2.8-2.4l2.9-2l5.5-3l3.7-1.4l3.3-0.9l2.7-0.6z" +
+  "M107.7 31.7l3-0l3.2 0.4l3.1 1l3.8 2l2.9 2.2l27.4 25l6.2 5.5l2.3 1.9l3.2 2l3.6 1.5l2 0.5l4.9 0.6l0.1 0.4l-0.3 0.4l-10.6 13.4l-0.7 0.4l-1.3-0.1l-2.3-0.4l-3.3-1l-3.2-1.4l-3.8-2.6l-34.9-32.4l-10.5-8.8l-4.6-4.1l-0.4-0.5l0.2-0.6l1.4-1.4l2-1.5l3.1-1.6z" +
+  "M173.8 37.8l1.7-0.1l1.9 0.3l1.4 0.5l1.2 0.8l1.2 1.1l1 1.5l0.5 1.1l0.6 1.9l0 1.6l-0.1 1.3l-0.5 1.4l-1 1.7l-1.1 1.3l-1.3 1l-1.8 0.8l-1.6 0.3l-1.4 0.1l-1.8-0.3l-1.4-0.6l-1.5-1l-1.1-0.9l-1-1.5l-0.5-1.2l-0.5-1.9l0-2l0.4-1.5l0.6-1.4l0.7-1.1l1.3-1.4l1.5-1z" +
+  "M8.6 38.7l1.8-0.1l2.1 0.4l1.6 0.6l2 1.3l1.4 1.4l1.1 1.6l0.6 1.4l0.3 2l0 2.1l-0.3 1.8l-0.6 1.6l-1 1.5l-1.5 1.6l-1.5 1l-2.1 1l-1.6 0.3l-1.6 0l-1.8-0.2l-1.5-0.5l-2-1.1l-1.4-1.4l-1.4-1.8l-0.6-1.2l-0.5-2l-0.1-2.1l0.2-1.6l0.5-1.7l1-1.8l1.5-1.7l1.5-1.1l2.2-0.9z" +
+  "M26.8 39.6l28.2-0.1l0.8 0.2l0.2 0.6l-0.5 2l-1.1 2.5l-1.4 2.5l-1.5 2.3l-2 2.4l-1.5 1.5l-1.1 1l-1.7 1.1l-3.3 1.3l-2.8 0.5l-14.3 0.1l-2-0.1l-0.4-0.4l1.6-3.5l0.5-1.9l0.4-3.2l-0.4-3.5l-1-2.6l-1.1-2.2l0.5-0.4z" +
+  "M97 51.4l1.9-0l1.7 0.4l1.2 0.5l1.1 0.7l1.1 1.1l1.1 1.5l0.5 1.2l0.4 1.7l0 2l-0.4 1.7l-0.5 1.2l-0.7 1.1l-1.2 1.3l-1.4 1l-1.3 0.5l-1.3 0.3l-1.6 0l-1.7-0.2l-2.5-1.2l-1.3-1.2l-1-1.2l-0.6-1.2l-0.5-1.7l-0.1-1.6l0.2-1.5l0.5-1.5l0.9-1.6l1.2-1.3l1.2-0.9l1.5-0.7z" +
+  "M0.5 60.9l0.5-0l1.9 1.1l2.3 0.9l2 0.5l1.9 0.2l2.5-0.1l2.6-0.6l2.2-0.9l2-1.2l0.5 0.2l0.1 0.5l-0 21.9l-0.4 3.2l-0.6 1.9l-0.9 2l-1.5 2.5l-1.6 1.8l-1.6 1.5l-2.3 1.5l-1.9 1l-1.7 0.6l-2.5 0.5l-3.2-0l-0.4-0.3l-0.2-0.5l-0-37.5z";
+
+/**
+ * f69 Labs mark. Fills with `currentColor`; size it by width (height follows the 2.15 : 1 aspect ratio).
+ * Use `text-mark` on the page background and `text-brand-fg` on a `bg-brand` tile.
+ */
+export function LogoMark({ className, title }: { className?: string; title?: string }) {
+  return (
+    <svg
+      viewBox="0 0 215 100"
+      fill="currentColor"
+      className={cn("aspect-[43/20] h-auto shrink-0", className)}
+      role={title ? "img" : undefined}
+      aria-label={title}
+      aria-hidden={title ? undefined : true}
+    >
+      <path d={F69_PATH} />
+    </svg>
+  );
+}
+
+export function Wordmark({
+  className,
+  stacked = false,
+  size = "md",
+  showMark = true,
+}: {
+  className?: string;
+  stacked?: boolean;
+  size?: "sm" | "md" | "lg";
+  showMark?: boolean;
+}) {
+  const text = size === "lg" ? "text-[40px]" : size === "sm" ? "text-[22px]" : "text-[26px]";
+  const mark = size === "lg" ? "w-[68px]" : size === "sm" ? "w-[38px]" : "w-[46px]";
+  return (
+    <div className={cn("flex items-center gap-2.5", className)}>
+      {showMark && <LogoMark className={cn("text-mark", mark)} title="f69 Labs" />}
+      <div className={cn("flex leading-none", stacked ? "flex-col gap-1" : "items-baseline gap-2")}>
+        <span className={cn("font-serif-display leading-none tracking-tight", text)}>Ren</span>
+        <span className="small-caps text-[11px] leading-none font-medium text-muted">by f69 Labs</span>
+      </div>
+    </div>
+  );
+}

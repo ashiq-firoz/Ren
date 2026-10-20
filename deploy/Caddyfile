@@ -1,0 +1,34 @@
+# Ren reverse proxy.
+#   DOMAIN=:80              → plain HTTP on any host (local machine / LAN; no certificate warnings)
+#   DOMAIN=ren.example.com  → automatic HTTPS (Let's Encrypt) for a real domain
+{$DOMAIN::80} {
+	# API, real-time stream and MCP endpoint → backend (no compression; flush immediately for SSE)
+	@backend path /api/* /mcp /mcp/* /docs /openapi.json
+	handle @backend {
+		reverse_proxy backend:8000 {
+			flush_interval -1
+			transport http {
+				read_timeout 1h
+			}
+		}
+	}
+
+	# Web app
+	handle {
+		encode zstd gzip
+		reverse_proxy frontend:3000
+	}
+
+	header {
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
+
+	# HSTS only over HTTPS on a real domain — never for localhost, where browsers would pin HTTPS for every local dev server.
+	@hsts {
+		protocol https
+		not host localhost 127.0.0.1
+	}
+	header @hsts Strict-Transport-Security "max-age=31536000; includeSubDomains"
+}

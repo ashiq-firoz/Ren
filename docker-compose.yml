@@ -1,0 +1,124 @@
+# Ren by f69 Labs — production stack
+#   cp .env.example .env   # set SECRET_KEY, SANDBOX_TOKEN, DOMAIN/PUBLIC_URL and a model provider
+#   docker compose up -d --build
+# Then open http://localhost (local default) or https://$DOMAIN when DOMAIN is a real domain.
+name: ren
+
+services:
+  db:
+    image: pgvector/pgvector:pg17
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ren
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ren}
+      POSTGRES_DB: ren
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ren -d ren"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+
+  laya:
+    build: ./services/laya
+    restart: unless-stopped
+    environment:
+      LAYA_API_KEY: ${LAYA_API_KEY:-}
+      LAYA_DEVICE: ${LAYA_DEVICE:-cpu}
+    volumes:
+      - laya-models:/models
+
+  sandbox:
+    build: ./sandbox
+    restart: unless-stopped
+    environment:
+      SANDBOX_TOKEN: ${SANDBOX_TOKEN:?Set SANDBOX_TOKEN in .env}
+    volumes:
+      - ren-data:/data
+    # Agents' shell/code run here, isolated from the backend and its secrets.
+    mem_limit: ${SANDBOX_MEMORY:-2g}
+    pids_limit: 512
+
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      sandbox:
+        condition: service_started
+    environment:
+      DATABASE_URL: postgresql+asyncpg://ren:${POSTGRES_PASSWORD:-ren}@db:5432/ren
+      REDIS_URL: redis://redis:6379/0
+      DATA_DIR: /data
+      SECRET_KEY: ${SECRET_KEY:?Set SECRET_KEY in .env}
+      FRONTEND_URL: ${PUBLIC_URL:-http://localhost}
+      PUBLIC_API_URL: ${PUBLIC_URL:-http://localhost}
+      CORS_ORIGINS: ${PUBLIC_URL:-http://localhost}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      OPENROUTER_MODEL: ${OPENROUTER_MODEL:-openai/gpt-4.1-mini}
+      OPENROUTER_FALLBACK_MODELS: ${OPENROUTER_FALLBACK_MODELS:-}
+      GOOGLE_AI_STUDIO_KEY: ${GOOGLE_AI_STUDIO_KEY:-}
+      GOOGLE_AI_STUDIO_MODEL: ${GOOGLE_AI_STUDIO_MODEL:-gemma-4-26b-a4b-it}
+      VLLM_BASE_URL: ${VLLM_BASE_URL:-}
+      VLLM_MODEL: ${VLLM_MODEL:-}
+      VLLM_API_KEY: ${VLLM_API_KEY:-}
+      EMBEDDING_PROVIDER: ${EMBEDDING_PROVIDER:-fastembed}
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-BAAI/bge-small-en-v1.5}
+      EMBEDDING_DIM: ${EMBEDDING_DIM:-384}
+      EMBEDDING_BASE_URL: ${EMBEDDING_BASE_URL:-}
+      EMBEDDING_API_KEY: ${EMBEDDING_API_KEY:-}
+      RERANKER_PROVIDER: ${RERANKER_PROVIDER:-fastembed}
+      LAYA_URL: http://laya:8000
+      LAYA_API_KEY: ${LAYA_API_KEY:-}
+      SANDBOX_URL: http://sandbox:8080
+      SANDBOX_TOKEN: ${SANDBOX_TOKEN}
+      WEB_SEARCH_PROVIDER: ${WEB_SEARCH_PROVIDER:-duckduckgo}
+      TAVILY_API_KEY: ${TAVILY_API_KEY:-}
+      BRAVE_API_KEY: ${BRAVE_API_KEY:-}
+      MAX_CONCURRENT_TASKS: ${MAX_CONCURRENT_TASKS:-6}
+    volumes:
+      - ren-data:/data
+    # Run exactly ONE backend replica: it hosts the agent runtime and resumes tasks on restart.
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        # Empty = same origin: the browser calls /api on whatever host served the page (Caddy routes it to the
+        # backend), so localhost, 127.0.0.1, a LAN IP and a real domain all work without rebuilding.
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-}
+    restart: unless-stopped
+    depends_on:
+      - backend
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on:
+      - backend
+      - frontend
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN:-:80}
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+
+volumes:
+  pgdata:
+  ren-data:
+  laya-models:
+  caddy-data:
+  caddy-config:

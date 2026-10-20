@@ -1,0 +1,6 @@
+# Developed on Windows, deployed on Linux: keep text files LF everywhere
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.ico binary
+*.tgz binary

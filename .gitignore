@@ -1,0 +1,29 @@
+# secrets
+.env
+backend/.env
+frontend/.env.local
+.claude
+# python
+backend/.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+backend/data/
+*.db
+*.db-wal
+*.db-shm
+hf-cache
+# node
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+
+# misc
+.DS_Store
+Thumbs.db
+*.log
+
+# benchmark runs (isolated Ren instance, results) and dataset cache
+backend/bench_runs/
+backend/bench/.cache/

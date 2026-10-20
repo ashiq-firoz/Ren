@@ -1,0 +1,17 @@
+# GPU override for the Laya alignment checker (NVIDIA Container Toolkit required):
+#   docker compose -f docker-compose.yml -f docker-compose.gpu.yml up -d --build
+services:
+  laya:
+    build:
+      context: ./services/laya
+      args:
+        TORCH_INDEX: https://download.pytorch.org/whl/cu124
+    environment:
+      LAYA_DEVICE: cuda
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
